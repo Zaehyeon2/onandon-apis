@@ -1,0 +1,18 @@
+dist
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+cdk.context.json
+
+# SAM build directory
+.aws-sam
+
+# test scripts
+test.ts
+
+# env file
+env/dq.env
+env/live.env
+env/local.env
