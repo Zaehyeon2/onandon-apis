@@ -3,20 +3,23 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetOAuthUrlResDto } from './dto';
 import { LoginService } from './login.service';
 import { safeParseOrThrow } from '../../essentials';
-import { NaverOAuthCallbackDto, NaverTokenResDto } from '../naver-api/dto';
+import { JwtService } from '../auth/jwt/jwt.service';
+import { NaverOAuthCallbackDto } from '../naver-api/dto';
+import { OAuthCallbackResDto } from './dto/oauth-callback.res.dto';
 
 @Controller('login')
 @ApiTags('Login')
 export class LoginController {
-  constructor(private readonly loginService: LoginService) {}
+  constructor(
+    private readonly loginService: LoginService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   @Get('oauth/url')
   @ApiOperation({ summary: 'Get authorization url' })
   async getAuthorizationUrl(): Promise<GetOAuthUrlResDto> {
-    const url = await this.loginService.getAuthorizationUrl();
-
     const response: GetOAuthUrlResDto = {
-      authorizationUrl: url,
+      authorizationUrl: this.loginService.getAuthorizationUrl(),
     };
 
     return safeParseOrThrow(GetOAuthUrlResDto.zodSchema.strict(), response);
@@ -24,25 +27,23 @@ export class LoginController {
 
   @Get('oauth/callback')
   @ApiOperation({ summary: 'OAuth callback' })
-  async oauthCallback(@Query() callbackParams: NaverOAuthCallbackDto): Promise<NaverTokenResDto> {
+  async oauthCallback(
+    @Query() callbackParams: NaverOAuthCallbackDto,
+  ): Promise<OAuthCallbackResDto> {
     const accessTokens = await this.loginService.getAccessToken(
       callbackParams.code,
       callbackParams.state,
     );
-    const now = Date.now();
 
-    await this.loginService.loginOrRegisterUser(accessTokens.access_token);
+    const user = await this.loginService.loginOrRegisterUser(accessTokens.access_token);
 
-    const response: NaverTokenResDto = {
-      access_token: accessTokens.access_token,
-      refresh_token: accessTokens.refresh_token,
-      token_type: accessTokens.token_type,
-      expires_in: `${now + Number(accessTokens.expires_in) * 1000}`,
+    const jwtToken = await this.jwtService.createToken(user);
+
+    const response: OAuthCallbackResDto = {
+      jwtToken,
     };
 
-    // TODO: JWT 토큰 발급
-
-    return safeParseOrThrow(NaverTokenResDto.zodSchema.strict(), response);
+    return safeParseOrThrow(OAuthCallbackResDto.zodSchema.strict(), response);
   }
 
   @Get('test/:accessToken')

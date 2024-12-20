@@ -1,10 +1,14 @@
-import { ArgumentsHost, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { NaverApiService } from '../../modules/naver-api/naver-api.service';
 import { serviceLogger as slog } from '../loggers/service-logger';
 import { ContextStorageMiddleware } from '../middlewares/context-storage.middleware';
 
 const API_ERROR_CODE = 'error';
 
+@Catch(HttpException)
 export class AllExceptionsFilter implements ExceptionFilter {
+  constructor(private readonly naverApiService: NaverApiService) {}
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -18,6 +22,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       result.status = exception.getStatus();
+    }
+
+    if (result.status === HttpStatus.UNAUTHORIZED) {
+      const naverApiUrl = this.naverApiService.getAuthorizationUrl();
+      response.setHeader('WWW-Authenticate', `Bearer realm="${naverApiUrl}"`);
     }
 
     // tid를 가져오다 에러가 발생하는 경우에 대한 처리.

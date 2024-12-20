@@ -10,4 +10,3 @@ export * from './utils/initiator';
 export * from './utils/env-utils';
 export * from './utils/utils';
 export * from './utils/zod-utils';
-export * from './filters/all-exception.filter';

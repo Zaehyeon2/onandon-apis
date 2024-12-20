@@ -21,7 +21,7 @@ export class UserController {
 
   @Patch()
   @ApiOperation({ summary: 'Update user' })
-  async updateUser(updateUserParams: UpdateUserDto): Promise<UpdateUserDto> {
+  async updateUser(@Query() updateUserParams: UpdateUserDto): Promise<UpdateUserDto> {
     await this.userService.updateUser(updateUserParams);
 
     return safeParseOrThrow(UpdateUserDto.zodSchema.strict(), updateUserParams);

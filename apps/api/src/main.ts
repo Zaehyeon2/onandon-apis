@@ -12,12 +12,12 @@ import {
   runApp,
   serviceLogger as slog,
 } from './essentials';
-import { UserMainModule } from './main.module';
+import { MainModule } from './main.module';
 
 configDotenv({ path: [`env/${getEnvName()}.env`, 'env/default.env'] });
 
 export async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(UserMainModule, {
+  const app = await NestFactory.create<NestExpressApplication>(MainModule, {
     logger: new NestLogger(),
     bodyParser: false, // RawBodyParserMiddleware 에서 parse를 하게 하기 위함
   });

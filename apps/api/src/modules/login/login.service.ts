@@ -10,7 +10,7 @@ export class LoginService {
     private readonly userService: UserService,
   ) {}
 
-  async getAuthorizationUrl() {
+  getAuthorizationUrl() {
     return this.naverApiService.getAuthorizationUrl();
   }
 

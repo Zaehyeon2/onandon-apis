@@ -37,7 +37,7 @@ export class NaverApiService {
     this.redirectUri = process.env.NAVER_REDIRECT_URI;
   }
 
-  async getAuthorizationUrl() {
+  getAuthorizationUrl() {
     const authorizationUrl = new URL(NAVER_OAUTH_AUTHORIZATION_URL);
 
     authorizationUrl.searchParams.append('response_type', 'code');
