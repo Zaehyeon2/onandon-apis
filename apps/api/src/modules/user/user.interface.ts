@@ -1,3 +1,4 @@
+import { createZodDto } from '@anatine/zod-nestjs';
 import validator from 'validator';
 import z from 'zod';
 
@@ -24,4 +25,4 @@ export const userSchema = z.object({
   createdAt: z.number().int().describe('The timestamp when the user was created'),
 });
 
-export type User = z.infer<typeof userSchema>;
+export class User extends createZodDto(userSchema) {}

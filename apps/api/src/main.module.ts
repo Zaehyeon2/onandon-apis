@@ -9,8 +9,8 @@ import {
 import { AllExceptionsFilter } from './essentials/filters/all-exception.filter';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { AdminGuard } from './modules/auth/jwt/jwt.admin.guard';
-import { UserGuard } from './modules/auth/jwt/jwt.user.guard';
+import { AdminGuardInner } from './modules/auth/jwt/jwt.admin.guard';
+import { UserGuardInner } from './modules/auth/jwt/jwt.user.guard';
 import { LoginModule } from './modules/login/login.module';
 import { NaverApiModule } from './modules/naver-api/naver-api.modules';
 import { UserModule } from './modules/user/user.module';
@@ -23,8 +23,8 @@ import { UserModule } from './modules/user/user.module';
       useClass: ResponseInterceptor,
     },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
-    UserGuard,
-    AdminGuard,
+    UserGuardInner,
+    AdminGuardInner,
   ],
 })
 export class MainModule {

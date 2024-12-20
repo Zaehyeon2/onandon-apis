@@ -32,6 +32,7 @@ export async function bootstrap() {
     const config = new DocumentBuilder()
       .addServer('/api')
       .addServer('/')
+      .addBearerAuth()
       .setTitle('Service API')
       .setDescription('The API description')
       .setVersion('1.0')
@@ -39,7 +40,11 @@ export async function bootstrap() {
 
     patchNestjsSwagger();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document);
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
   }
 
   return app;

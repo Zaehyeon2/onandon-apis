@@ -1,9 +1,17 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  UseGuards,
+  applyDecorators,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { serviceLogger as slog } from '../../../essentials';
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class AdminGuardInner implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -15,4 +23,8 @@ export class AdminGuard implements CanActivate {
     }
     return true;
   }
+}
+
+export function AdminGuard() {
+  return applyDecorators(UseGuards(AdminGuardInner), ApiBearerAuth());
 }

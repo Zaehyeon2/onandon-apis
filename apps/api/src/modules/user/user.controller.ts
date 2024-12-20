@@ -12,7 +12,9 @@ import { GetUserReqDto, GetUserResDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 import { MaintenanceGuard, MaintenanceType } from '../maintenance';
 import { User } from './user.interface';
+import { UserParam } from './user.param.decorator';
 import { safeParseOrThrow } from '../../essentials';
+import { UserGuard } from '../auth/jwt/jwt.user.guard';
 
 @Controller('user')
 @UseGuards(MaintenanceGuard([MaintenanceType.GLOBAL]))
@@ -21,7 +23,15 @@ export class UserController {
 
   @Patch()
   @ApiOperation({ summary: 'Update user' })
-  async updateUser(@Query() updateUserParams: UpdateUserDto): Promise<UpdateUserDto> {
+  @UserGuard()
+  async updateUser(
+    @UserParam() user: User,
+    @Query() updateUserParams: UpdateUserDto,
+  ): Promise<UpdateUserDto> {
+    if (user.id !== updateUserParams.id) {
+      throw new BadRequestException('Invalid user id');
+    }
+
     await this.userService.updateUser(updateUserParams);
 
     return safeParseOrThrow(UpdateUserDto.zodSchema.strict(), updateUserParams);
