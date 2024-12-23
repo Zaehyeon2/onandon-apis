@@ -1,11 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetOAuthUrlResDto } from './dto';
+import { GetOAuthUrlResDto, OAuthCallbackResDto } from './dto';
 import { LoginService } from './login.service';
 import { safeParseOrThrow } from '../../essentials';
 import { JwtService } from '../auth/jwt/jwt.service';
 import { NaverOAuthCallbackDto } from '../naver-api/dto';
-import { OAuthCallbackResDto } from './dto/oauth-callback.res.dto';
 
 @Controller('login')
 @ApiTags('Login')

@@ -3,9 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import https from 'https';
 import { catchError, firstValueFrom } from 'rxjs';
+import { NaverProfileResDto, NaverTokenResDto } from './dto';
 import { getEnvName, safeParseOrThrow, serviceLogger as slog } from '../../essentials';
-import { NaverProfileResDto } from './dto/naver-profile.res.dto';
-import { NaverTokenResDto } from './dto/naver-token.res.dto';
 
 const NAVER_OAUTH_AUTHORIZATION_URL = 'https://nid.naver.com/oauth2.0/authorize';
 const NAVER_OAUTH_TOKEN_URL = 'https://nid.naver.com/oauth2.0/token';
