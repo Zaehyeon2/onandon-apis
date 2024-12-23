@@ -19,10 +19,10 @@ export const userSchema = z.object({
     .refine(validator.isMobilePhone)
     .describe('The phone number of the user'),
   gender: z.nativeEnum(Gender).describe('The gender of the user'),
-  birthDate: z.number().int().describe('The timestamp of the user birth date'),
+  birthDate: z.coerce.number().int().describe('The timestamp of the user birth date'),
   isAdmin: z.boolean().describe('Whether the user is an admin'),
   profileImage: z.string().url().optional().describe('The URL of the user profile image'),
-  createdAt: z.number().int().describe('The timestamp when the user was created'),
+  createdAt: z.coerce.number().int().describe('The timestamp when the user was created'),
 });
 
 export class User extends createZodDto(userSchema) {}
