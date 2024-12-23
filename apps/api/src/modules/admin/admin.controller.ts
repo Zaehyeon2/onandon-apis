@@ -77,7 +77,7 @@ export class AdminController {
   @Patch(`${userPrefix}/isAdmin`)
   @ApiOperation({ summary: 'Update user isAdmin status' })
   async updateIsAdmin(@Body() updateIsAdminDto: UpdateIsAdminDto): Promise<UpdateIsAdminDto> {
-    await this.userService.updateIsAdmin(updateIsAdminDto.email, updateIsAdminDto.isAdmin);
+    await this.userService.updateIsAdmin(updateIsAdminDto.id, updateIsAdminDto.isAdmin);
 
     return safeParseOrThrow(UpdateIsAdminDto.zodSchema.strict(), updateIsAdminDto);
   }

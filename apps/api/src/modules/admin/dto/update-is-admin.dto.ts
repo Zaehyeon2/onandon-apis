@@ -3,7 +3,7 @@ import { userSchema } from '../../user/user.interface';
 
 export class UpdateIsAdminDto extends createZodDto(
   userSchema.pick({
-    email: true,
+    id: true,
     isAdmin: true,
   }),
 ) {}
