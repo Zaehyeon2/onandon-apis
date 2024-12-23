@@ -90,5 +90,43 @@ export function createApiGateway(
     ),
   });
 
+  // Create a WAF WebACL
+  const webAcl = new cdk.aws_wafv2.CfnWebACL(stack, 'PublicWebACL', {
+    scope: 'REGIONAL',
+    name: `${prefix}-${env}-public-web-acl`,
+    defaultAction: { allow: {} },
+    visibilityConfig: {
+      cloudWatchMetricsEnabled: true,
+      metricName: `${prefix}-${env}-public-web-acl`,
+      sampledRequestsEnabled: true,
+    },
+    rules: [
+      {
+        name: 'IpRateLimitRule',
+        priority: 1,
+        action: { block: {} },
+        statement: {
+          rateBasedStatement: {
+            limit: 10,
+            evaluationWindowSec: 1,
+            aggregateKeyType: 'IP',
+          },
+        },
+        visibilityConfig: {
+          cloudWatchMetricsEnabled: true,
+          metricName: `${prefix}-${env}-ip-rate-limit-rule`,
+          sampledRequestsEnabled: true,
+        },
+      },
+    ],
+  });
+
+  // Associate the WAF with the API Gateway
+  // eslint-disable-next-line no-new
+  new cdk.aws_wafv2.CfnWebACLAssociation(stack, 'PublicWebACLAssociation', {
+    resourceArn: `arn:aws:apigateway:${stack.region}::/restapis/${apigateway.restApiId}/stages/prod`, // Adjust to reflect correct stage
+    webAclArn: webAcl.attrArn,
+  });
+
   return { apigateway, baseMapping, aliasRecord, customDomain, certificate };
 }
