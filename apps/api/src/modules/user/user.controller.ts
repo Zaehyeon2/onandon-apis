@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { GetUserReqDto, GetUserResDto, UpdateUserDto } from './dto';
+import { GetUserByPhoneReqDto, GetUserResDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 import { MaintenanceGuard, MaintenanceType } from '../maintenance';
 import { User } from './user.interface';
@@ -37,18 +37,17 @@ export class UserController {
     return safeParseOrThrow(UpdateUserDto.zodSchema.strict(), updateUserParams);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get a user by id or phoneNumber' })
-  async getUserByIdOrPhoneNumber(@Query() query: GetUserReqDto): Promise<GetUserResDto> {
-    let user: User | null = null;
+  @Get('my-info')
+  @ApiOperation({ summary: 'Get my info' })
+  @UserGuard()
+  async getMyInfo(@UserParam() user: User): Promise<GetUserResDto> {
+    return safeParseOrThrow(GetUserResDto.zodSchema.strict(), user);
+  }
 
-    if (query.id) {
-      user = await this.userService.getUserById(query.id);
-    } else if (query.phoneNumber) {
-      user = await this.userService.getUserByPhoneNumber(query.phoneNumber);
-    } else {
-      throw new BadRequestException('id or phoneNumber is required');
-    }
+  @Get()
+  @ApiOperation({ summary: 'Get a user by phoneNumber' })
+  async getUserByPhoneNumber(@Query() query: GetUserByPhoneReqDto): Promise<GetUserResDto> {
+    const user = await this.userService.getUserByPhoneNumber(query.phoneNumber);
 
     if (!user) {
       throw new NotFoundException('User not found');
