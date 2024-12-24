@@ -1,10 +1,28 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UpdateMaintenanceDto, GetMaintenanceReqDto, UpdateIsAdminDto } from './dto';
+import {
+  UpdateMaintenanceDto,
+  GetMaintenanceReqDto,
+  UpdateIsAdminDto,
+  PutWodDto,
+  PatchWodDto,
+  DeleteWodDto,
+} from './dto';
 import { safeParseOrThrow } from '../../essentials';
 import { MaintenanceDto } from '../maintenance/maintenance.interface';
 import { MaintenanceService } from '../maintenance/maintenance.service';
 import { UserService } from '../user/user.service';
+import { WodService } from '../wod/wod.service';
 
 const maintenancePrefix = 'maintenance';
 const userPrefix = 'user';
@@ -16,6 +34,7 @@ export class AdminController {
   constructor(
     private readonly maintenanceService: MaintenanceService,
     private readonly userService: UserService,
+    private readonly wodService: WodService,
   ) {}
 
   /** ****************************************
@@ -80,5 +99,53 @@ export class AdminController {
     await this.userService.updateIsAdmin(updateIsAdminDto.id, updateIsAdminDto.isAdmin);
 
     return safeParseOrThrow(UpdateIsAdminDto.zodSchema.strict(), updateIsAdminDto);
+  }
+
+  /** ****************************************
+   *                 WOD
+   **************************************** */
+  @Post('wod')
+  @ApiOperation({ summary: 'Create WOD' })
+  async createWod(@Body() putWodDto: PutWodDto): Promise<void> {
+    await this.wodService.putWod(putWodDto);
+  }
+
+  @Patch('wod')
+  @ApiOperation({ summary: 'Update WOD' })
+  async updateWod(@Body() patchWodDto: PatchWodDto): Promise<void> {
+    const wod = await this.wodService.getWodByDayAndSortKey(
+      patchWodDto.date,
+      patchWodDto['startTime#endTime'],
+    );
+
+    if (!wod) {
+      throw new NotFoundException('Wod not found');
+    }
+
+    if (
+      patchWodDto.capacity !== undefined &&
+      patchWodDto.capacity < Object.keys(wod.participants).length
+    ) {
+      throw new BadRequestException('Capacity is less than the number of participants');
+    }
+
+    await this.wodService.updateWod(patchWodDto.date, patchWodDto['startTime#endTime'], {
+      startTime: patchWodDto.startTime,
+      endTime: patchWodDto.endTime,
+      title: patchWodDto.title,
+      description: patchWodDto.description,
+      capacity: patchWodDto.capacity,
+      coach: patchWodDto.coach,
+    });
+  }
+
+  @Delete('wod/:date/:startTime/:endTime')
+  @ApiOperation({ summary: 'Delete WOD' })
+  async deleteWod(@Param() deleteWodDto: DeleteWodDto) {
+    await this.wodService.deleteWod(
+      deleteWodDto.date,
+      deleteWodDto.startTime,
+      deleteWodDto.endTime,
+    );
   }
 }

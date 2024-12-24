@@ -17,6 +17,10 @@ export class WodService {
     return this.wodRepository.getWodByDay(getDayByDate(date));
   }
 
+  async getWodByDayAndSortKey(date: number, sortKey: string) {
+    return this.wodRepository.getWodByDayAndSortKeyString(date, sortKey);
+  }
+
   async putWod(
     params: Pick<
       Wod,
@@ -24,6 +28,25 @@ export class WodService {
     >,
   ) {
     return this.wodRepository.putWod(params);
+  }
+
+  async updateWod(
+    date: number,
+    sortKey: string,
+    params: {
+      startTime?: number;
+      endTime?: number;
+      title?: string;
+      description?: string;
+      capacity?: number;
+      coach?: string;
+    },
+  ) {
+    return this.wodRepository.updateWod(date, sortKey, params);
+  }
+
+  async deleteWod(date: number, startTime: number, endTime: number) {
+    await this.wodRepository.deleteWod(date, startTime, endTime);
   }
 
   async bookWod(user: User, params: { date: number; startTime: number; endTime: number }) {

@@ -1,3 +1,4 @@
+import { NativeAttributeValue } from '@aws-sdk/lib-dynamodb';
 import { Injectable } from '@nestjs/common';
 import { parseDDBItem, parseDDBItems, serviceLogger as slog } from '../../essentials';
 import { DynamoDBService } from '../dynamoDB';
@@ -67,6 +68,21 @@ export class WodRepository {
     return parseDDBItem(Item, wodSchema);
   }
 
+  async getWodByDayAndSortKeyString(date: number, sortKey: string) {
+    const { Item } = await this.dynamoDBService.getItem(this.wodTableName, {
+      key: {
+        date,
+        'startTime#endTime': sortKey,
+      },
+    });
+
+    if (!Item) {
+      return null;
+    }
+
+    return parseDDBItem(Item, wodSchema);
+  }
+
   async putWod(
     params: Pick<
       Wod,
@@ -85,6 +101,80 @@ export class WodRepository {
       coach: params.coach,
     };
     await this.dynamoDBService.putItem(this.wodTableName, { item: wod });
+  }
+
+  async updateWod(
+    date: number,
+    sortKey: string,
+    params: {
+      startTime?: number;
+      endTime?: number;
+      title?: string;
+      description?: string;
+      capacity?: number;
+      coach?: string;
+    },
+  ) {
+    const updateExpression: string[] = [];
+    const expressionAttributeNames: Record<string, string> = {};
+    const expressionAttributeValues: Record<string, NativeAttributeValue> = {};
+
+    if (params.startTime !== undefined) {
+      updateExpression.push('#startTime = :startTime');
+      expressionAttributeNames['#startTime'] = 'startTime';
+      expressionAttributeValues[':startTime'] = params.startTime;
+    }
+
+    if (params.endTime !== undefined) {
+      updateExpression.push('#endTime = :endTime');
+      expressionAttributeNames['#endTime'] = 'endTime';
+      expressionAttributeValues[':endTime'] = params.endTime;
+    }
+
+    if (params.title) {
+      updateExpression.push('#title = :title');
+      expressionAttributeNames['#title'] = 'title';
+      expressionAttributeValues[':title'] = params.title;
+    }
+
+    if (params.description) {
+      updateExpression.push('#description = :description');
+      expressionAttributeNames['#description'] = 'description';
+      expressionAttributeValues[':description'] = params.description;
+    }
+
+    if (params.capacity !== undefined) {
+      updateExpression.push('#capacity = :capacity');
+      expressionAttributeNames['#capacity'] = 'capacity';
+      expressionAttributeValues[':capacity'] = params.capacity;
+    }
+
+    if (params.coach) {
+      updateExpression.push('#coach = :coach');
+      expressionAttributeNames['#coach'] = 'coach';
+      expressionAttributeValues[':coach'] = params.coach;
+    }
+
+    const result = await this.dynamoDBService.updateItem(this.wodTableName, {
+      key: {
+        date,
+        'startTime#endTime': sortKey,
+      },
+      updateExpression: `SET ${updateExpression.join(', ')}`,
+      expressionAttributeNames,
+      expressionAttributeValues,
+    });
+
+    return parseDDBItem(result.Attributes, wodSchema);
+  }
+
+  async deleteWod(date: number, startTime: number, endTime: number) {
+    await this.dynamoDBService.deleteItem(this.wodTableName, {
+      key: {
+        date,
+        'startTime#endTime': this.getSortKey(startTime, endTime),
+      },
+    });
   }
 
   private getSortKey(startTime: number, endTime: number) {

@@ -55,7 +55,7 @@ export class UserRepository {
 
   async updateUser(user: UpdateUserDto) {
     try {
-      const updateExpression = [];
+      const updateExpression: string[] = [];
       const expressionAttributeNames: Record<string, string> = {};
       const expressionAttributeValues: Record<string, NativeAttributeValue> = {};
 
