@@ -66,10 +66,33 @@ export function createApi(
 
   ddbTableUser.grantReadWriteData(handlerApi);
 
+  // WOD DDB TABLE
+  const ddbTableWod = new cdk.aws_dynamodb.Table(stack, 'DdbTableWod', {
+    partitionKey: { name: 'date', type: cdk.aws_dynamodb.AttributeType.NUMBER },
+    sortKey: { name: 'startTime#endTime', type: cdk.aws_dynamodb.AttributeType.STRING },
+    tableName: `${prefix}-${env}-wod`,
+    billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+    pointInTimeRecovery: true,
+  });
+
+  ddbTableWod.grantReadWriteData(handlerApi);
+
+  // WOD HISTORY DDB TABLE
+  const ddbTableWodHistory = new cdk.aws_dynamodb.Table(stack, 'DdbTableWodHistory', {
+    partitionKey: { name: 'userId', type: cdk.aws_dynamodb.AttributeType.STRING },
+    sortKey: { name: 'wodDate#startTime#endTime', type: cdk.aws_dynamodb.AttributeType.STRING },
+    tableName: `${prefix}-${env}-wod-history`,
+    billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+    pointInTimeRecovery: true,
+  });
+
+  ddbTableWodHistory.grantReadWriteData(handlerApi);
+
   return {
     handlerApi,
     logGroupApi,
     ddbTableMaintenance,
     ddbTableUser,
+    ddbTableWod,
   };
 }

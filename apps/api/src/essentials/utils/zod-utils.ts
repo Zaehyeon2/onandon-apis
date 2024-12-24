@@ -66,3 +66,44 @@ export function parseDDBItem<T extends z.ZodRawShape>(
 
   return safeParseOrThrow(schema, value);
 }
+
+export function reqCursorSchema<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
+  return z.object({
+    cursor: z
+      .string()
+      .min(10)
+      .max(400)
+      .refine((v) => isValidCursor(v, schema))
+      .transform((v) => transformCursor(v, schema))
+      .optional()
+      .describe('The next index to get items'),
+    size: z.coerce
+      .number()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(50)
+      .describe('The number of items to get'),
+  });
+}
+
+export function resCursorWithResultSchema<T extends z.ZodRawShape, U extends z.ZodRawShape>(
+  resultSchema: z.ZodObject<T>,
+  cursorSchema: z.ZodObject<U>,
+) {
+  return z.object({
+    results: z.array(resultSchema),
+    cursor: z
+      .string()
+      .refine((v: string) => {
+        try {
+          cursorSchema.parse(decodeBase64Url(v));
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .optional()
+      .describe('The next index to get results if there are more results'),
+  });
+}

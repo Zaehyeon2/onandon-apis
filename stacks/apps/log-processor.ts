@@ -14,9 +14,6 @@ export function createLogProcessor(
     loggingFormat: cdk.aws_lambda.LoggingFormat;
     logLevel: cdk.aws_lambda.ApplicationLogLevel;
     openSearchUrl: string;
-    vpc?: cdk.aws_ec2.IVpc;
-    securityGroups?: cdk.aws_ec2.ISecurityGroup[];
-    vpcSubnets?: cdk.aws_ec2.SelectedSubnets;
   },
 ) {
   const {
@@ -28,9 +25,6 @@ export function createLogProcessor(
     loggingFormat,
     logLevel,
     openSearchUrl,
-    vpc,
-    securityGroups,
-    vpcSubnets,
   } = prop;
 
   const secretsMgr = new cdk.aws_secretsmanager.Secret(stack, 'SecretsMgrLogProcessor', {
@@ -59,9 +53,6 @@ export function createLogProcessor(
       OPENSEARCH_URL: openSearchUrl,
       OPENSEARCH_TOKEN: openSearchToken,
     },
-    vpc,
-    securityGroups,
-    vpcSubnets,
   });
 
   const logGroupMakerSqs = new cdk.aws_logs.LogGroup(stack, 'LgGrLogProcessorLog', {

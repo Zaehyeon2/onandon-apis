@@ -14,9 +14,10 @@ import { UserGuardInner } from './modules/auth/jwt/jwt.user.guard';
 import { LoginModule } from './modules/login/login.module';
 import { NaverApiModule } from './modules/naver-api/naver-api.modules';
 import { UserModule } from './modules/user/user.module';
+import { WodModule } from './modules/wod/wod.module';
 
 @Module({
-  imports: [AdminModule, UserModule, LoginModule, NaverApiModule, AuthModule],
+  imports: [AdminModule, UserModule, LoginModule, NaverApiModule, AuthModule, WodModule],
   providers: [
     {
       provide: APP_INTERCEPTOR,

@@ -1,7 +1,6 @@
 /* eslint-disable no-new */
 /* eslint-disable import/no-extraneous-dependencies */
 import * as cdk from 'aws-cdk-lib';
-import { SubnetFilter } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { createApi } from './apps/api';
 import { createLogProcessor } from './apps/log-processor';
@@ -45,18 +44,6 @@ export class ServiceStack extends cdk.Stack {
     }
 
     let openSearchUrl = 'http://localhost:9200';
-    const vpc = new cdk.aws_ec2.Vpc(this, 'Vpc');
-    const vpcSubnet = new cdk.aws_ec2.Subnet(this, 'Subnet', {
-      vpcId: vpc.vpcId,
-      availabilityZone: vpc.availabilityZones[0]!,
-      cidrBlock: vpc.vpcCidrBlock,
-    });
-    const securityGroup = new cdk.aws_ec2.SecurityGroup(this, 'SecurityGroup', {
-      vpc,
-    });
-    const vpcSubnets = vpc.selectSubnets({
-      subnetFilters: [SubnetFilter.byIds([vpcSubnet.subnetId])],
-    });
 
     let publicZoneName = 'publiczonename';
     let publicHostedZoneId = 'publichostedzoneid';
@@ -98,9 +85,6 @@ export class ServiceStack extends cdk.Stack {
       loggingFormat,
       logLevel,
       openSearchUrl,
-      vpc,
-      securityGroups: [securityGroup],
-      vpcSubnets,
     });
 
     const publicApiGw = createApiGateway(this, prefix, env, 'Public', {

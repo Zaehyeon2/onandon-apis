@@ -16,7 +16,7 @@ export class LoginController {
 
   @Get('oauth/url')
   @ApiOperation({ summary: 'Get authorization url' })
-  async getAuthorizationUrl(): Promise<GetOAuthUrlResDto> {
+  getAuthorizationUrl(): GetOAuthUrlResDto {
     const response: GetOAuthUrlResDto = {
       authorizationUrl: this.loginService.getAuthorizationUrl(),
     };
